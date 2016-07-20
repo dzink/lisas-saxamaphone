@@ -1,0 +1,11 @@
+assets:
+  - sax.sql.gz
+steps:
+  - name: Setup Drupal site
+    plugin: Drupal
+    database: sax.sql.gz
+    databaseGzipped: true
+  - name: Generate login link
+    command: 'drush uli admin'
+  - name: Generate content.
+    command: drush en devel devel_generate -y && drush genc 200 --types=saxamaphone
