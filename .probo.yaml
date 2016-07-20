@@ -5,6 +5,7 @@ steps:
     plugin: Drupal
     database: sax.sql.gz
     databaseGzipped: true
+    revertFeatures: true
   - name: Generate login link
     command: 'drush uli admin'
   - name: Generate content.
