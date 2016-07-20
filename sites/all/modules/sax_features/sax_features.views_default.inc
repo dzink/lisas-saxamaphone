@@ -45,6 +45,21 @@ function sax_features_views_default_views() {
   $handler->display->display_options['fields']['created']['field'] = 'created';
   $handler->display->display_options['fields']['created']['date_format'] = 'short';
   $handler->display->display_options['fields']['created']['second_date_format'] = 'long';
+  /* Field: Field: Image */
+  $handler->display->display_options['fields']['field_asset_image']['id'] = 'field_asset_image';
+  $handler->display->display_options['fields']['field_asset_image']['table'] = 'field_data_field_asset_image';
+  $handler->display->display_options['fields']['field_asset_image']['field'] = 'field_asset_image';
+  $handler->display->display_options['fields']['field_asset_image']['label'] = '';
+  $handler->display->display_options['fields']['field_asset_image']['element_type'] = '0';
+  $handler->display->display_options['fields']['field_asset_image']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_asset_image']['element_wrapper_type'] = '0';
+  $handler->display->display_options['fields']['field_asset_image']['element_default_classes'] = FALSE;
+  $handler->display->display_options['fields']['field_asset_image']['click_sort_column'] = 'fid';
+  $handler->display->display_options['fields']['field_asset_image']['settings'] = array(
+    'image_style' => 'thumbnail',
+    'image_link' => '',
+  );
+  $handler->display->display_options['fields']['field_asset_image']['field_api_classes'] = TRUE;
   /* Sort criterion: Content: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
