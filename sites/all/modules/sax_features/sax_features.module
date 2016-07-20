@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the sax_features feature.
+ */
+
+include_once 'sax_features.features.inc';
