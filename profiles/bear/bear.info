@@ -1,0 +1,86 @@
+name = Bear
+description = A profile to give developers the tools needed for just about any site.
+core = 7.x
+
+# Core Extensions
+dependencies[] = contextual
+dependencies[] = block
+dependencies[] = dblog
+dependencies[] = field_ui
+dependencies[] = file
+dependencies[] = help
+dependencies[] = node
+dependencies[] = options
+dependencies[] = list
+dependencies[] = menu
+dependencies[] = number
+dependencies[] = path
+dependencies[] = taxonomy
+dependencies[] = update
+
+# Contrib Extensions
+dependencies[] = admin_menu
+dependencies[] = admin_menu_toolbar
+dependencies[] = admin_views
+dependencies[] = asset
+dependencies[] = asset_document
+dependencies[] = asset_image
+dependencies[] = bear_habitat
+dependencies[] = bear_necessities
+dependencies[] = block_class
+dependencies[] = breadcrumbs_by_path
+dependencies[] = chosen
+dependencies[] = coffee
+dependencies[] = ckeditor
+dependencies[] = ctools
+dependencies[] = inline_entity_form
+dependencies[] = views_content
+dependencies[] = page_manager
+dependencies[] = date
+dependencies[] = date_popup
+dependencies[] = date_views
+dependencies[] = diff
+dependencies[] = devel
+dependencies[] = entity
+dependencies[] = entity_view_mode
+dependencies[] = entitycache
+dependencies[] = entityreference
+dependencies[] = features
+dependencies[] = fences
+dependencies[] = field_group
+dependencies[] = habitat
+dependencies[] = jquery_update
+dependencies[] = libraries
+dependencies[] = link
+dependencies[] = linkit
+dependencies[] = menu_block
+dependencies[] = menu_expanded
+dependencies[] = module_filter
+dependencies[] = multiform
+dependencies[] = oembed
+dependencies[] = oembedembedly
+dependencies[] = page_manager_templates
+dependencies[] = panels
+dependencies[] = pathauto
+dependencies[] = picture
+dependencies[] = token
+dependencies[] = redirect
+dependencies[] = responsive_menus
+dependencies[] = strongarm
+dependencies[] = styleguide
+dependencies[] = views
+dependencies[] = views_bulk_operations
+dependencies[] = views_ui
+dependencies[] = xmlsitemap
+
+files[] = bear.profile
+
+# System Requirements
+php_memory_limit = 128M
+
+; Information added by Drupal.org packaging script on 2015-12-17
+version = "7.x-2.0"
+core = "7.x"
+project = "bear"
+datestamp = "1450381084"
+

@@ -1,0 +1,127 @@
+<?php
+/**
+ * @file
+ * Code for the Bear Necessities feature.
+ */
+
+include_once 'bear_necessities.features.inc';
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function bear_necessities_form_node_type_form_alter(&$form, &$form_state, $form_id) {
+  if (empty($form['#node_type']->type)) {
+    // Set 'Preview before submitting' to disabled.
+    $form['submission']['node_preview']['#default_value'] = DRUPAL_DISABLED;
+
+    // Set publishing options.
+    $form['workflow']['node_options']['#default_value'] = array('status', 'revision');
+
+    // Unset display author information.
+    $form['display']['node_submitted']['#default_value'] = FALSE;
+
+    // Set comments to hidden.
+    if (module_exists('comment')) {
+      $form['comment']['comment']['#default_value'] = COMMENT_NODE_HIDDEN;
+    }
+  }
+}
+
+/*
+ * Implements hook_form_node_form_alter().
+ */
+function bear_necessities_form_node_form_alter(&$form, &$form_state) {
+  // Remove 'promote to frontpage' and 'make sticky' options.
+  unset($form['options']['sticky']);
+  unset($form['options']['promote']);
+
+  // We want to hide revision information from people that do not have permission
+  // to view content revisions.
+  if (module_exists('workbench_moderation') && isset($form['revision_information']['workbench_moderation_state_new'])) {
+    return;
+  }
+  if (!user_access('view revisions')) {
+    if (isset($form['revision_information']['#access'])) {
+      $form['revision_information']['#access'] = FALSE;
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function bear_necessities_form_ckeditor_admin_profile_form_alter(&$form, &$form_state) {
+  // By default turn off CKEditor's "Advanced Content Filter" which removes
+  // html tags that do not have wysiwyg buttons enabled.
+  if (empty($form['advanced']['js_conf']['#default_value'])) {
+    $form['advanced']['js_conf']['#default_value'] = 'config.allowedContent = true;';
+  }
+}
+
+/**
+ * Implements hook_menu_block_blocks().
+ */
+function bear_necessities_menu_block_blocks() {
+  return array(
+    'bear_necessities-1' => array(
+      'menu_name'   => 'main-menu',
+      'parent_mlid' => 0,
+      'title_link'  => 0,
+      'admin_title' => '',
+      'level'       => 1,
+      'follow'      => 0,
+      'depth'       => 0,
+      'expanded'    => 0,
+      'sort'        => 0,
+    ),
+  );
+}
+
+/**
+ * Implements hook_library_alter().
+ *
+ * Add our custom css for the asset widget library so that we can add the embed
+ * icon.
+ */
+function bear_necessities_library_alter(&$libraries, $module) {
+  if ($module === 'asset_widget') {
+    $libraries['asset_widget']['css'][drupal_get_path('module', 'bear_necessities') . '/css/bear-asset-widget.css'] = array('weight' => 12, 'group' => CSS_THEME);
+  }
+}
+
+/**
+ * Implements hook_filter_info().
+ */
+function bear_necessities_filter_info() {
+  $filters = array();
+
+  $filters['kill_nbsp'] = array(
+    'title' => t('Kill Non-Breaking Spaces'),
+    'description' => t('Remove non-breaking spaces.'),
+    'process callback' => '_bear_necessities_kill_nbsp',
+    'tips callback' => '_bear_necessities_kill_nbsp_tips',
+  );
+
+  return $filters;
+}
+
+/**
+ * Filter callbacks.
+ */
+function _bear_necessities_kill_nbsp($text, $filter) {
+  return preg_replace('/&nbsp;/', ' ', $text);
+}
+
+/**
+ * Filter tips.
+ */
+function _bear_necessities_kill_nbsp_tips($filter, $format, $long = FALSE) {
+  if (!$long) {
+    // This string will be shown in the content add/edit form.
+    return t('Don\'t use non-breaking spaces.  Ever.');
+  }
+  else {
+    // And this one on the "Filter Tips" page.
+    return t('Non-breaking spaces are evil and will be eradicated.');
+  }
+}
