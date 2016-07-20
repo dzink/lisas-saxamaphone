@@ -2419,7 +2419,7 @@ function menu_set_active_trail($new_trail = NULL) {
           // argument placeholders (%). Such links are not contained in regular
           // menu trees, and have only been loaded for the additional
           // translation that happens here, so as to be able to display them in
-          // the breadcumb for the current page.
+          // the breadcrumb for the current page.
           // @see _menu_tree_check_access()
           // @see _menu_link_translate()
           if (strpos($link['href'], '%') !== FALSE) {
@@ -2504,7 +2504,6 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     // Weight must be taken from {menu_links}, not {menu_router}.
     $query->addField('ml', 'weight', 'link_weight');
     $query->fields('m');
-    $query->orderBy('ml.customized', 'DESC');
     $query->condition('ml.link_path', $path_candidates, 'IN');
     $query->addTag('preferred_menu_links');
 

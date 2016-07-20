@@ -370,37 +370,64 @@ class CommonURLUnitTest extends DrupalWebTestCase {
     $result = url($url);
     $this->assertEqual($url, $result, 'External URL without protocol is not altered.');
   }
+}
 
-  function testSchemeRelativeUrls() {
-    $test_url = '//drupal.org';
+/**
+ * Tests url_is_external().
+ */
+class UrlIsExternalUnitTest extends DrupalUnitTestCase {
 
-    // Verify scheme-relative URL can contain a fragment.
-    $url = $test_url . '#drupal';
-    $result = url($url);
-    $this->assertEqual($url, $result, 'Scheme-relative URL with fragment works without a fragment in $options.');
+  public static function getInfo() {
+    return array(
+      'name' => 'External URL checking',
+      'description' => 'Performs tests on url_is_external().',
+      'group' => 'System',
+    );
+  }
 
-    // Verify fragment can be overidden in an external URL.
-    $url = $test_url . '#drupal';
-    $fragment = $this->randomName(10);
-    $result = url($url, array('fragment' => $fragment));
-    $this->assertEqual($test_url . '#' . $fragment, $result, 'Scheme-relative URL fragment is overidden with a custom fragment in $options.');
+  /**
+   * Tests if each URL is external or not.
+   */
+  function testUrlIsExternal() {
+    foreach ($this->examples() as $path => $expected) {
+      $this->assertIdentical(url_is_external($path), $expected, $path);
+    }
+  }
 
-    // Verify external URL can contain a query string.
-    $url = $test_url . '?drupal=awesome';
-    $result = url($url);
-    $this->assertEqual($url, $result, 'Scheme-relative URL with query string works without a query string in $options.');
-
-    // Verify external URL can be extended with a query string.
-    $url = $test_url;
-    $query = array($this->randomName(5) => $this->randomName(5));
-    $result = url($url, array('query' => $query));
-    $this->assertEqual($url . '?' . http_build_query($query, '', '&'), $result, 'Scheme-relative URL can be extended with a query string in $options.');
-
-    // Verify query string can be extended in an external URL.
-    $url = $test_url . '?drupal=awesome';
-    $query = array($this->randomName(5) => $this->randomName(5));
-    $result = url($url, array('query' => $query));
-    $this->assertEqual($url . '&' . http_build_query($query, '', '&'), $result, 'Scheme-relative URL query string can be extended with a custom query string in $options.');
+  /**
+   * Provides data for testUrlIsExternal().
+   *
+   * @return array
+   *   An array of test data, keyed by a path, with the expected value where
+   *   TRUE is external, and FALSE is not external.
+   */
+  protected function examples() {
+    return array(
+      // Simple external URLs.
+      'http://example.com' => TRUE,
+      'https://example.com' => TRUE,
+      'http://drupal.org/foo/bar?foo=bar&bar=baz&baz#foo' => TRUE,
+      '//drupal.org' => TRUE,
+      // Some browsers ignore or strip leading control characters.
+      "\x00//www.example.com" => TRUE,
+      "\x08//www.example.com" => TRUE,
+      "\x1F//www.example.com" => TRUE,
+      "\n//www.example.com" => TRUE,
+      // JSON supports decoding directly from UTF-8 code points.
+      json_decode('"\u00AD"') . "//www.example.com" => TRUE,
+      json_decode('"\u200E"') . "//www.example.com" => TRUE,
+      json_decode('"\uE0020"') . "//www.example.com" => TRUE,
+      json_decode('"\uE000"')  . "//www.example.com" => TRUE,
+      // Backslashes should be normalized to forward.
+      '\\\\example.com' => TRUE,
+      // Local URLs.
+      'node' => FALSE,
+      '/system/ajax' => FALSE,
+      '?q=foo:bar' => FALSE,
+      'node/edit:me' => FALSE,
+      '/drupal.org' => FALSE,
+      '<front>' => FALSE,
+    );
   }
 }
 
@@ -1288,6 +1315,15 @@ class DrupalGotoTest extends DrupalWebTestCase {
     $this->assertText('drupal_goto', 'Drupal goto redirect succeeded.');
     $this->assertEqual($this->getUrl(), url('common-test/drupal_goto', array('query' => array('foo' => '123'), 'absolute' => TRUE)), 'Drupal goto redirected to expected URL.');
 
+    // Test that calling drupal_goto() on the current path is not dangerous.
+    variable_set('common_test_redirect_current_path', TRUE);
+    $this->drupalGet('', array('query' => array('q' => 'http://www.example.com/')));
+    $headers = $this->drupalGetHeaders(TRUE);
+    list(, $status) = explode(' ', $headers[0][':status'], 3);
+    $this->assertEqual($status, 302, 'Expected response code was sent.');
+    $this->assertNotEqual($this->getUrl(), 'http://www.example.com/', 'Drupal goto did not redirect to external URL.');
+    $this->assertTrue(strpos($this->getUrl(), url('<front>', array('absolute' => TRUE))) === 0, 'Drupal redirected to itself.');
+    variable_del('common_test_redirect_current_path');
     // Test that drupal_goto() respects ?destination=xxx. Use an complicated URL
     // to test that the path is encoded and decoded properly.
     $destination = 'common-test/drupal_goto/destination?foo=%2525&bar=123';
@@ -2249,7 +2285,7 @@ class ValidUrlTestCase extends DrupalUnitTestCase {
    * Test valid absolute URLs.
    */
   function testValidAbsolute() {
-    $url_schemes = array('http://', 'https://', 'ftp://', '//');
+    $url_schemes = array('http', 'https', 'ftp');
     $valid_absolute_urls = array(
       'example.com',
       'www.example.com',
@@ -2273,7 +2309,7 @@ class ValidUrlTestCase extends DrupalUnitTestCase {
 
     foreach ($url_schemes as $scheme) {
       foreach ($valid_absolute_urls as $url) {
-        $test_url = $scheme . $url;
+        $test_url = $scheme . '://' . $url;
         $valid_url = valid_url($test_url, TRUE);
         $this->assertTrue($valid_url, format_string('@url is a valid url.', array('@url' => $test_url)));
       }
@@ -2284,7 +2320,7 @@ class ValidUrlTestCase extends DrupalUnitTestCase {
    * Test invalid absolute URLs.
    */
   function testInvalidAbsolute() {
-    $url_schemes = array('http://', 'https://', 'ftp://', '//');
+    $url_schemes = array('http', 'https', 'ftp');
     $invalid_ablosule_urls = array(
       '',
       'ex!ample.com',
@@ -2293,7 +2329,7 @@ class ValidUrlTestCase extends DrupalUnitTestCase {
 
     foreach ($url_schemes as $scheme) {
       foreach ($invalid_ablosule_urls as $url) {
-        $test_url = $scheme . $url;
+        $test_url = $scheme . '://' . $url;
         $valid_url = valid_url($test_url, TRUE);
         $this->assertFalse($valid_url, format_string('@url is NOT a valid url.', array('@url' => $test_url)));
       }
