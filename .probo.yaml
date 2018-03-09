@@ -1,11 +1,11 @@
-assets:
-  - lisas.sql.gz
+image: lampin-latest
+proboBaseImage: proboci/ubuntu-14.04-lamp
 steps:
-  - name: Setup Drupal site
-    plugin: Drupal
-    database: lisas.sql.gz
-    databaseGzipped: true
-    revertFeatures: true
-    fileProxy: https://example.com
+  - name: Update database
+    command: drush updb -y
+  - name: Revert features
+    command: drush cc all
+  - name: Clear caches
+    command: drush cc all
   - name: Generate login link
     command: 'drush uli admin'
