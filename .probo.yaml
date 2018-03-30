@@ -1,12 +1,11 @@
 assets:
-  - sax.sql.gz
+  - lisas.sql.gz
 steps:
   - name: Setup Drupal site
     plugin: Drupal
-    database: sax.sql.gz
+    database: lisas.sql.gz
     databaseGzipped: true
     revertFeatures: true
+    fileProxy: https://example.com
   - name: Generate login link
     command: 'drush uli admin'
-  - name: Generate content.
-    command: drush en devel devel_generate -y && drush cc drush && drush genc 200 --types=saxamaphone
