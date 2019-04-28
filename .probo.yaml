@@ -1,12 +1,11 @@
-assets:
-  - sax.sql.gz
+image: lampin-latest
+proboBaseImage: proboci/ubuntu-14.04-lamp
 steps:
-  - name: Setup Drupal site
-    plugin: Drupal
-    database: sax.sql.gz
-    databaseGzipped: true
-    revertFeatures: true
+  - name: Update database
+    command: drush updb -y
+  - name: Revert features
+    command: drush cc all
+  - name: Clear caches
+    command: drush cc all
   - name: Generate login link
     command: 'drush uli admin'
-  - name: Generate content.
-    command: drush en devel devel_generate -y && drush cc drush && drush genc 200 --types=saxamaphone
